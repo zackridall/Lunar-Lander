@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/FlyUnder.unity
+    guid: e890066ba48938849a12324c6e84f656
+  - enabled: 1
+    path: Assets/Scenes/FlyOver.unity
+    guid: 7fce29a6c5eed7c43912c14c70af3d9e
   m_configObjects: {}

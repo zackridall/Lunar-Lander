@@ -4,19 +4,25 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    // Start is called before the first frame update
+
+    [SerializeField] public float thrustForce = 1000;
+    [SerializeField] public float rotateSpeed = 100;
+    [SerializeField] public AudioClip mainEngine;
+    [SerializeField] public ParticleSystem rotateRightParticles;
+    [SerializeField] public ParticleSystem rotateLeftParticles;
+    [SerializeField] public ParticleSystem thrustParticles;
+
+    private Rigidbody rb;
+    private AudioSource audioSource;
 
     private KeyCode _thrustKey = KeyCode.Space;
-    private KeyCode _rotateLeft = KeyCode.A;
-    private KeyCode _rotateRight = KeyCode.D;
-    private Rigidbody rb;
-
-    [SerializeField] public float ThrustForce = 1000;
-    [SerializeField] public float RotateSpeed = 100;
+    private KeyCode _rotateLeftKey = KeyCode.A;
+    private KeyCode _rotateRightKey = KeyCode.D;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -29,35 +35,83 @@ public class Movement : MonoBehaviour
     void ProcessThrust()
     {
         var thrusting = Input.GetKey(_thrustKey);
-        var thrustForce = Vector3.up * Time.deltaTime * ThrustForce;
+        var thrustForce = Vector3.up * Time.deltaTime * this.thrustForce;
 
         if (thrusting)
         {
-            rb.AddRelativeForce(thrustForce);
-           
+            _startThrusting(thrustForce);
         }
-     
+        else
+        {
+            _stopThrusting();
+        }
     }
-
     void ProcessRotation()
     {
-        var rotatingLeft = Input.GetKey(_rotateLeft);
-        var rotatingRight = Input.GetKey(_rotateRight);
-       
+        var rotatingLeft = Input.GetKey(_rotateLeftKey);
+        var rotatingRight = Input.GetKey(_rotateRightKey);
+
 
         if (rotatingLeft)
         {
-            ApplyRotation(Vector3.forward);
+            _rotateLeft();
         }
         else if (rotatingRight)
         {
-            transform.Rotate(Vector3.back);          
+            _rotateRight();
+        }
+        else
+        {
+            _stopRotation();
         }
     }
 
-    private void ApplyRotation(Vector3 direction)
+    //-------------------------------------------------------------------------
+
+    private void _startThrusting(Vector3 thrustForce)
     {
-        var rotationForce = Time.deltaTime * RotateSpeed;
+        if (!thrustParticles.isPlaying)
+        {
+            thrustParticles.Play();
+        }
+        if (!audioSource.isPlaying)
+        {
+            audioSource.PlayOneShot(mainEngine);
+        }
+        rb.AddRelativeForce(thrustForce);
+    }
+    private void _stopThrusting()
+    {
+        thrustParticles.Stop();
+        audioSource.Stop();
+    }
+
+    private void _rotateLeft()
+    {
+        _applyRotation(Vector3.forward);
+
+        if (!rotateLeftParticles.isPlaying)
+        {
+            rotateLeftParticles.Play();
+        }
+    }
+    private void _rotateRight()
+    {
+        _applyRotation(Vector3.back);
+        if (!rotateRightParticles.isPlaying)
+        {
+            rotateRightParticles.Play();
+        }
+    }
+    private void _stopRotation()
+    {
+        rotateRightParticles.Stop();
+        rotateLeftParticles.Stop();
+    }
+
+    private void _applyRotation(Vector3 direction)
+    {
+        var rotationForce = Time.deltaTime * rotateSpeed;
         
         // Freeze location so we can manually rotate
         rb.freezeRotation = true;
